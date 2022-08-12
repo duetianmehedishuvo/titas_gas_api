@@ -17,27 +17,25 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
-$router->post('/register', 'RegistrationController@onRegister');
-$router->post('/login', 'LoginController@onLogin');
-$router->get('/all_meter', ['middleware' => 'auth', 'uses' => 'MeterController@onSelect']);
-$router->post('/add_meter', ['middleware' => 'auth', 'uses' => 'MeterController@onInsert']);
-$router->post('/upload', ['middleware' => 'auth', 'uses' => 'PhotoUploadController@create']);
 
-$router->post('/tokenTest', ['middleware' => 'auth', 'uses' => 'LoginController@tokenTest']);
-$router->post('/insert', ['middleware' => 'auth', 'uses' => 'PhoneBookController@onInsert']);
-$router->post('/select', ['middleware' => 'auth', 'uses' => 'PhoneBookController@onSelect']);
-$router->post('/delete', ['middleware' => 'auth', 'uses' => 'PhoneBookController@onDelete']);
+$router->group(['prefix'=>'api'],function() use ($router){
 
-//$router->group(['prefix'=>'api'],function() use ($router){
-//
-//    $router->post('/login', 'AuthController@login');
-//    $router->post('/register', 'AuthController@register');
-//
-//    $router->group(['middleware'=>'auth'],function() use ($router){
-//        $router->post('/logout', 'AuthController@logout');
-//        $router->get('/posts','PostController@index');
-//        $router->post('/posts','PostController@store');
-//        $router->put('/posts/{id}','PostController@update');
-//        $router->delete('/posts/{id}','PostController@delete');
-//    });
-//});
+   // TODO: for Authentication
+    $router->post('/register', 'RegistrationController@onRegister');
+    $router->post('/login', 'LoginController@onLogin');
+
+   $router->group(['middleware'=>'auth'],function() use ($router){
+    
+    // TODO: for Test Token
+    $router->post('/tokenTest', 'LoginController@tokenTest');
+
+    // TODO: for Transaction
+        $router->get('/getAllTranaction','TransactionController@getAllTransctionList');
+        $router->post('/addTranaction','TransactionController@addTranaction');
+        $router->get('/getTranactionById','TransactionController@getTranactionByID');
+
+    // TODO: for Meter
+        $router->get('/all_meter', 'MeterController@onSelect');
+        $router->post('/add_meter', 'MeterController@onInsert');
+   });
+});
