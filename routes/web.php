@@ -21,6 +21,7 @@ $router->post('/register', 'RegistrationController@onRegister');
 $router->post('/login', 'LoginController@onLogin');
 $router->get('/all_meter', ['middleware' => 'auth', 'uses' => 'MeterController@onSelect']);
 $router->post('/add_meter', ['middleware' => 'auth', 'uses' => 'MeterController@onInsert']);
+$router->post('/upload', ['middleware' => 'auth', 'uses' => 'PhotoUploadController@create']);
 
 $router->post('/tokenTest', ['middleware' => 'auth', 'uses' => 'LoginController@tokenTest']);
 $router->post('/insert', ['middleware' => 'auth', 'uses' => 'PhoneBookController@onInsert']);
