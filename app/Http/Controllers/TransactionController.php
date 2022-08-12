@@ -24,6 +24,17 @@ class TransactionController extends Controller
 
         $meterCount = MeterModel::where(["meterID" => $meter_id])->count();
         $userCount = RegistrationModel::where('user_id', $user_id)->count();
+        $listAllMeterID=TransactionModel::orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->distinct()->pluck('meterID');
+        $meterStatus=0;
+        $arrLength = count($listAllMeterID);
+        for($i = 0; $i < $arrLength; $i++) {
+            if($listAllMeterID[$i] == $meter_id) {
+                $meterStatus = 1;
+                break;
+            }
+        }
+        if($meterStatus == 0) {
+            
         if ($meterCount == 1 && $userCount == 1) {
             
             if($fileData!=null){
@@ -58,10 +69,16 @@ class TransactionController extends Controller
         }else {
             return response()->json(['message' => 'User Not Found', 'statusCode' => 404])->setStatusCode(404);
         }
+        
+        }else{
+            return response()->json(['message' => 'Meter Already User', 'statusCode' => 404])->setStatusCode(404);
+        }
+
     }
 
     function getAllTransctionList(Request $request)
     {
+        
         return TransactionModel::all();
     }
 
@@ -89,6 +106,23 @@ class TransactionController extends Controller
             }
         }
 
+    }
+
+    function getAllTranactionOrder(Request $request)
+    {
+        $listAllMeterID=TransactionModel::orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->distinct()->pluck('meterID');
+        $normallistAllMeterID=TransactionModel::orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->get();
+        $arrLength = count($listAllMeterID);
+        for($i = 0; $i < $arrLength; $i++) {
+
+            //echo $listAllMeterID[$i].'<br>';
+            $normallis=TransactionModel::where('meterID',$listAllMeterID[$i])->orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->get();
+            echo $normallis[0].'<br>';
+        
+        
+        }
+
+        return $arrLength;
     }
 
 

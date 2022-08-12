@@ -33,6 +33,7 @@ $router->group(['prefix'=>'api'],function() use ($router){
         $router->get('/getAllTranaction','TransactionController@getAllTransctionList');
         $router->post('/addTranaction','TransactionController@addTranaction');
         $router->get('/getTranactionById','TransactionController@getTranactionByID');
+        $router->get('/getTranactionqwq','TransactionController@getAllTranactionOrder');
 
     // TODO: for Meter
         $router->get('/all_meter', 'MeterController@onSelect');

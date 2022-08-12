@@ -12,6 +12,7 @@ class MeterController extends Controller
     
     function onSelect(Request $request)
     {
+        
         return MeterModel::all();
     }
 
