@@ -152,4 +152,63 @@ class TransactionController extends Controller
         return $result;
     }
 
+    function updateTransaction(Request $request)
+    {
+        
+        $user_id = $request->input('user_id');
+        $meter_id = $request->input('meter_id');
+        $date=date('Y-m-d H:i:s');
+        $reportNo=time();
+        $comment=$request->input('comment');
+        $fileData=$request->file('reportImage');
+        $reportImage='';
+        $meterCount = MeterModel::where(["meterID" => $meter_id])->count();
+        $userCount = RegistrationModel::where('user_id', $user_id)->count();
+        
+        if ($meterCount >= 1 && $userCount >= 1) {
+            
+            if($fileData!=null){
+                $imageUrl=time().$fileData->getClientOriginalName();
+                $fileData->move('images', $imageUrl);
+                $reportImage=$imageUrl;
+            }else{
+                $reportImage='no-image-found.jpg';
+            }
+            $result = TransactionModel::where(['userID' => $user_id, 'meterID' => $meter_id])->update([
+                
+                'createDate' => $date,
+                'Comment' => $comment,
+                'ReportImage' => $reportImage
+
+            ]);
+            if ($result == true) {
+                return response()->json(['message' => 'Transaction Updated Successfully', 'statusCode' => 200])->setStatusCode(200);
+        
+            } else {
+                return response()->json(['message' => 'Transaction Updated Failed', 'statusCode' => 404])->setStatusCode(404);
+        
+            }
+            
+        } else if($meterCount == 0){
+            return response()->json(['message' => 'Meter Not Found', 'statusCode' => 404])->setStatusCode(404);
+        }else {
+            return response()->json(['message' => 'User Not Found', 'statusCode' => 404])->setStatusCode(404);
+        }
+}
+
+function deleteTransaction(Request $request)
+{
+    
+    $id = $request->input('id');
+
+    $result = TransactionModel::where(['id' => $id])->delete();
+    if ($result == true) {
+        return response()->json(['message' => 'Transaction Deleted Successfully', 'statusCode' => 200])->setStatusCode(200);
+
+    } else {
+        return response()->json(['message' => 'Transaction Deleted Failed', 'statusCode' => 404])->setStatusCode(404);
+
+    }
+}
+
 }
