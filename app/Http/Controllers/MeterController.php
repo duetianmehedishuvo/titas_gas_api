@@ -5,6 +5,8 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use App\Models\MeterModel;
+use App\Models\TransactionModel;
+use Illuminate\Support\Facades\DB;
 
 class MeterController extends Controller
 {
@@ -12,7 +14,6 @@ class MeterController extends Controller
     
     function onSelect(Request $request)
     {
-        
         return MeterModel::all();
     }
 

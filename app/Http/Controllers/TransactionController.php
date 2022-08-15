@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\TransactionModel;
 use App\Models\MeterModel;
 use App\Models\RegistrationModel;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -24,18 +25,26 @@ class TransactionController extends Controller
 
         $meterCount = MeterModel::where(["meterID" => $meter_id])->count();
         $userCount = RegistrationModel::where('user_id', $user_id)->count();
-        $listAllMeterID=TransactionModel::orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->distinct()->pluck('meterID');
+        
+        $query = 'SELECT MAX(id) as id FROM transactiontable group by userID;';
+        $result=DB::select($query);
+        
         $meterStatus=0;
-        $arrLength = count($listAllMeterID);
+        $arrLength = count($result);
+
         for($i = 0; $i < $arrLength; $i++) {
-            if($listAllMeterID[$i] == $meter_id) {
+            $query111='SELECT * FROM transactiontable WHERE id ='.$result[$i]->id.';';
+            $res=DB::select($query111);
+
+            if($res[0]->meterID== $meter_id) {
                 $meterStatus = 1;
                 break;
-            }
+            }   
         }
+
         if($meterStatus == 0) {
             
-        if ($meterCount == 1 && $userCount == 1) {
+        if ($meterCount >= 1 && $userCount >= 1) {
             
             if($fileData!=null){
                 $imageUrl=time().$fileData->getClientOriginalName();
@@ -49,7 +58,7 @@ class TransactionController extends Controller
                 
                 'userID' => $user_id,
                 'meterID' => $meter_id,
-                'Date' => $date,
+                'createDate' => $date,
                 'ReportNo' => $reportNo,
                 'Comment' => $comment,
                 'ReportImage' => $reportImage
@@ -110,14 +119,17 @@ class TransactionController extends Controller
 
     function getAllTranactionOrder(Request $request)
     {
-        $listAllMeterID=TransactionModel::orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->distinct()->pluck('meterID');
-        $normallistAllMeterID=TransactionModel::orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->get();
+        $listAllMeterID=TransactionModel::orderBy('createDate','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->distinct()->pluck('meterID');
+        print($listAllMeterID."\n");
+
+        $normallistAllMeterID=TransactionModel::orderBy('createDate','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->get();
+        // print($normallistAllMeterID);
         $arrLength = count($listAllMeterID);
         for($i = 0; $i < $arrLength; $i++) {
 
             //echo $listAllMeterID[$i].'<br>';
-            $normallis=TransactionModel::where('meterID',$listAllMeterID[$i])->orderBy('Date','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->get();
-            echo $normallis[0].'<br>';
+            $normallis=TransactionModel::where('meterID',$listAllMeterID[$i])->orderBy('createDate','DESC')->orderBy('userID','DESC')->orderBy('ReportNo','DESC')->get();
+            echo $normallis.'<br>';
         
         
         }
@@ -125,5 +137,19 @@ class TransactionController extends Controller
         return $arrLength;
     }
 
+    function getUniqueId(Request $request)
+    {
+        
+        $query = 'SELECT MAX(id) as id FROM transactiontable group by userID;';
+        $result=DB::select($query);
+        
+        $meterStatus=0;
+        $arrLength = count($result);
+        for($i = 0; $i < $arrLength; $i++) {
+            print_r($result[$i]->id);
+        }
+        
+        return $result;
+    }
 
 }
