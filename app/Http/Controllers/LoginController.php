@@ -18,8 +18,7 @@ class LoginController extends Controller
         if ($userCount == 1) {
 
             $user = RegistrationModel::where(["user_id" => $user_id, "password" => $password,])->first();
-            if ($user->password == $password) {
-                $key = env('TOKEN_KEY');
+            $key = env('TOKEN_KEY');
                 $payload = array(
                     "site" => "http://demo.com",
                     "email" => $user->email,
@@ -28,12 +27,11 @@ class LoginController extends Controller
                     "id" => $user->user_id,
                 );
                 $jwt = JWT::encode($payload, $key, 'HS256');
-                return response()->json(['token' => $jwt, 'status' => ' Login Success']);
-            } else {
-                return 'Login Fail Try Again';
-            }
+                return response()->json(['message' => ' Login Success','token' => $jwt,  'user' => $user]);
+                
         } else {
-            return 'User Not Found';
+            return response()->json(['message' => 'User not found', 'statusCode' => 404])->setStatusCode(404);
+
         }
     }
 

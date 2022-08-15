@@ -88,7 +88,7 @@ class TransactionController extends Controller
     function getAllTransctionList(Request $request)
     {
         
-        return TransactionModel::all();
+        return TransactionModel::orderby('id','desc')->get();
     }
 
     function getTranactionByID(Request $request)
