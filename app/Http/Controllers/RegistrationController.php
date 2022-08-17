@@ -113,4 +113,19 @@ class RegistrationController extends Controller
         }
     }
 
+    function getUserProfile(Request $request)
+    {
+        $access_token = str_replace('Bearer ', '', $request->header('Authorization'));
+        $key = env('TOKEN_KEY');
+        $decoded = JWT::decode($access_token, new Key($key, 'HS256'));
+        $decoded_array = (array)$decoded;
+        $userID = $decoded_array['id'];
+        $userCount = RegistrationModel::where('user_id', $userID)->count();
+        if ($userCount >= 1) {
+            return RegistrationModel::where('user_id', $userID)->first();
+        } else {
+            return response()->json(['message' => 'User not found', 'statusCode' => 404])->setStatusCode(404);
+        }
+    }
+
 }

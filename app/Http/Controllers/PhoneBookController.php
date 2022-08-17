@@ -44,6 +44,7 @@ class PhoneBookController extends Controller
         $key = env('TOKEN_KEY');
         $decoded = JWT::decode($access_token, new Key($key, 'HS256'));
         $decoded_array = (array)$decoded;
+        
         $user = $decoded_array['user'];
         $result = PhoneBookModel::where('username', $user)->get();
 

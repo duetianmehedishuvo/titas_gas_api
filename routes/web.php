@@ -35,6 +35,7 @@ $router->group(['prefix'=>'api'],function() use ($router){
         $router->get('/getUserByID', 'RegistrationController@getUserByID');
         $router->post('/updateUser', 'RegistrationController@updateUser');
         $router->post('/changePassword', 'LoginController@changePassword');
+        $router->get('/user', 'RegistrationController@getUserProfile');
 
     // TODO: for Transaction
         $router->get('/getAllTranaction','TransactionController@getAllTransctionList');
