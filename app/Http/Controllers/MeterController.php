@@ -22,14 +22,21 @@ class MeterController extends Controller
 
         $year = $request->input('year');
         $meterID = $request->input('meter-id');
-        $result = MeterModel::insert([
-            'year' => $year,
-            'meterID' => $meterID
-        ]);
-        if ($result == true) {
-            return "Save Success ";
-        } else {
-            return "Fail ! Try Again";
+        $count=MeterModel::where(["meterID" => $meterID])->count();
+        if($count==0){
+            $result = MeterModel::insert([
+                'year' => $year,
+                'meterID' => $meterID,
+            ]);
+            if ($result == true) {
+                return response()->json(['message' => 'Meter Save Success ', 'statusCode' => 200])->setStatusCode(200);
+                
+            } else {
+                return response()->json(['message' => 'Save Failed', 'statusCode' => 404])->setStatusCode(404);
+               
+            }
+        }else{
+            return response()->json(['message' => 'Meter ID already exists', 'statusCode' => 404])->setStatusCode(404);
         }
     }
 
