@@ -16,7 +16,7 @@ class TransactionController extends Controller
         
         $user_id = $request->input('user_id');
         $meter_id = $request->input('meter_id');
-        $date=date('Y-m-d H:i:s');
+        $date=      $request->input('date');
         $reportNo=time();
         $comment=$request->input('comment');
         $fileData=$request->file('reportImage');
@@ -58,7 +58,7 @@ class TransactionController extends Controller
                 
                 'userID' => $user_id,
                 'meterID' => $meter_id,
-                'createDate' => $date,
+                'createDate' => date('Y-m-d', strtotime($date)),
                 'ReportNo' => $reportNo,
                 'Comment' => $comment,
                 'ReportImage' => $reportImage
@@ -157,7 +157,7 @@ class TransactionController extends Controller
         
         $user_id = $request->input('user_id');
         $meter_id = $request->input('meter_id');
-        $date=date('Y-m-d H:i:s');
+        $date=      $request->input('date');
         $reportNo=time();
         $comment=$request->input('comment');
         $fileData=$request->file('reportImage');
@@ -168,24 +168,28 @@ class TransactionController extends Controller
         if ($meterCount >= 1 && $userCount >= 1) {
             
             if($fileData!=null){
+               
                 $imageUrl=time().$fileData->getClientOriginalName();
                 $fileData->move('images', $imageUrl);
                 $reportImage=$imageUrl;
-            }else{
-                $reportImage='no-image-found.jpg';
-            }
-            $result = TransactionModel::where(['userID' => $user_id, 'meterID' => $meter_id])->update([
                 
-                'createDate' => $date,
-                'Comment' => $comment,
-                'ReportImage' => $reportImage
+                $result = TransactionModel::where(['userID' => $user_id, 'meterID' => $meter_id])->update([
+                    'createDate' => date('Y-m-d', strtotime($date)),
+                    'Comment' => $comment,
+                    'ReportImage' => $reportImage
+                ]);
+            }else{
+                
+                $result = TransactionModel::where(['userID' => $user_id, 'meterID' => $meter_id])->update([
+                    'createDate' => date('Y-m-d', strtotime($date)),
+                    'Comment' => $comment,
+                ]);
+            }
 
-            ]);
             if ($result == true) {
                 return response()->json(['message' => 'Transaction Updated Successfully', 'statusCode' => 200])->setStatusCode(200);
-        
             } else {
-                return response()->json(['message' => 'Transaction Updated Failed', 'statusCode' => 404])->setStatusCode(404);
+                return response()->json(['message' => 'Transaction Updated Failed, Please Change Somethings', 'statusCode' => 404])->setStatusCode(404);
         
             }
             
