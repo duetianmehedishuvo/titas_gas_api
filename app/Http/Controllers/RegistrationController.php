@@ -11,40 +11,40 @@ class RegistrationController extends Controller
     function onRegister(Request $request)
     {
         $name = $request->input('name');
-        $email = $request->input('email');
-        $address = $request->input('address');
+        $section = $request->input('section');
+        $designation = $request->input('designation');
         $phone = $request->input('phone');
-        $userID = $request->input('userID');
+        $job_code = $request->input('job_code');
         $password = $request->input('password');
         $current_date = date('Y-m-d H:i:s');
-        $userCount = RegistrationModel::where('user_id', $userID)->count();
+        $userCount = RegistrationModel::where('job_code', $job_code)->count();
         if ($userCount == 0) {
             $result = RegistrationModel::insert([
                 'name' => $name,
-                'email' => $email,
-                'address' => $address,
+                'section' => $section,
+                'designation' => $designation,
                 'phone' => $phone,
                 'password' => $password,
-                'user_id' => $userID,
+                'job_code' => $job_code,
                 'isUpdate' => 0,
                 'isDelete' => 0,
                 'isAdd' => 0,
                 'isView' => 1,
-                'isAdmin' => 1,
+                'isAdmin' => 0,
                 'created_at' => $current_date,
                 'updated_at' => $current_date
 
             ]);
 
             if ($result == true) {
-                $user = RegistrationModel::where(["user_id" => $userID, "password" => $password,])->first();
+                $user = RegistrationModel::where(["job_code" => $job_code, "password" => $password,])->first();
             $key = env('TOKEN_KEY');
                 $payload = array(
                     "site" => "http://demo.com",
                     "email" => $user->email,
                     "iat" => time(),
                     "exp" => time() + 3600,
-                    "id" => $user->user_id,
+                    "id" => $user->job_code,
                 );
                 $jwt = JWT::encode($payload, $key, 'HS256');
                 return response()->json(['message' => 'Registration Succesfull','token' => $jwt,  'user' => $user])->setStatusCode(200);
@@ -67,10 +67,10 @@ class RegistrationController extends Controller
 
     function getUserByID(Request $request)
     {
-        $userID = $request->input('userID');
-        $userCount = RegistrationModel::where('user_id', $userID)->count();
+        $job_code = $request->input('job_code');
+        $userCount = RegistrationModel::where('job_code', $job_code)->count();
         if ($userCount >= 1) {
-            return RegistrationModel::where('user_id', $userID)->first();
+            return RegistrationModel::where('job_code', $job_code)->first();
         } else {
             return response()->json(['message' => 'User not found', 'statusCode' => 404])->setStatusCode(404);
         }
@@ -78,10 +78,10 @@ class RegistrationController extends Controller
 
     function updateUser(Request $request)
     {
-        $userID = $request->input('userID');
+        $job_code = $request->input('job_code');
         $name = $request->input('name');
-        $email = $request->input('email');
-        $address = $request->input('address');
+        $section = $request->input('section');
+        $designation = $request->input('designation');
         $phone = $request->input('phone');
         $current_date = date('Y-m-d H:i:s');
         $isUpdate=$request->input('isUpdate');
@@ -89,12 +89,12 @@ class RegistrationController extends Controller
         $isAdd=$request->input('isAdd');
         $isView=$request->input('isView');
         $isAdmin=$request->input('isAdmin');
-        $userCount = RegistrationModel::where('user_id', $userID)->count();
+        $userCount = RegistrationModel::where('job_code', $job_code)->count();
         if ($userCount >= 1) {
-            $result = RegistrationModel::where('user_id', $userID)->update([
+            $result = RegistrationModel::where('job_code', $job_code)->update([
                 'name' => $name,
-                'email' => $email,
-                'address' => $address,
+                'section' => $section,
+                'designation' => $designation,
                 'phone' => $phone,
                 'isUpdate' => $isUpdate,
                 'isDelete' => $isDelete,
@@ -119,10 +119,10 @@ class RegistrationController extends Controller
         $key = env('TOKEN_KEY');
         $decoded = JWT::decode($access_token, new Key($key, 'HS256'));
         $decoded_array = (array)$decoded;
-        $userID = $decoded_array['id'];
-        $userCount = RegistrationModel::where('user_id', $userID)->count();
+        $job_code = $decoded_array['id'];
+        $userCount = RegistrationModel::where('job_code', $job_code)->count();
         if ($userCount >= 1) {
-            return RegistrationModel::where('user_id', $userID)->first();
+            return RegistrationModel::where('job_code', $job_code)->first();
         } else {
             return response()->json(['message' => 'User not found', 'statusCode' => 404])->setStatusCode(404);
         }

@@ -6,7 +6,7 @@ use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use App\Models\TransactionModel;
 use App\Models\MeterModel;
-use App\Models\RegistrationModel;
+use App\Models\CustomerModel;
 use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
@@ -14,19 +14,19 @@ class TransactionController extends Controller
     function addTranaction(Request $request)
     {
         
-        $user_id = $request->input('user_id');
+        $customer_id = $request->input('customer_id');
         $meter_id = $request->input('meter_id');
         $date=      $request->input('date');
-        $reportNo=time();
+        $reportNo=$request->input('reportNo');
         $comment=$request->input('comment');
         $fileData=$request->file('reportImage');
 
         $reportImage='';
 
         $meterCount = MeterModel::where(["meterID" => $meter_id])->count();
-        $userCount = RegistrationModel::where('user_id', $user_id)->count();
+        $userCount = CustomerModel::where('customer_id', $customer_id)->count();
         
-        $query = 'SELECT MAX(id) as id FROM transactiontable group by userID;';
+        $query = 'SELECT MAX(id) as id FROM transactiontable group by customer_id;';
         $result=DB::select($query);
         
         $meterStatus=0;
@@ -47,7 +47,7 @@ class TransactionController extends Controller
         if ($meterCount >= 1 && $userCount >= 1) {
             
             if($fileData!=null){
-                $imageUrl=time().$fileData->getClientOriginalName();
+                $imageUrl=$reportNo.'.'.$fileData->extension();
                 $fileData->move('images', $imageUrl);
                 $reportImage=$imageUrl;
             }else{
@@ -56,7 +56,7 @@ class TransactionController extends Controller
 
             $result = TransactionModel::insert([
                 
-                'userID' => $user_id,
+                'customer_id' => $customer_id,
                 'meterID' => $meter_id,
                 'createDate' => date('Y-m-d', strtotime($date)),
                 'ReportNo' => $reportNo,
@@ -76,7 +76,7 @@ class TransactionController extends Controller
         } else if($meterCount == 0){
             return response()->json(['message' => 'Meter Not Found', 'statusCode' => 404])->setStatusCode(404);
         }else {
-            return response()->json(['message' => 'User Not Found', 'statusCode' => 404])->setStatusCode(404);
+            return response()->json(['message' => 'Customer Not Found', 'statusCode' => 404])->setStatusCode(404);
         }
         
         }else{
@@ -94,17 +94,17 @@ class TransactionController extends Controller
     function getTranactionByID(Request $request)
     {
         
-        $userID = $request->input('user_id');
+        $customer_id = $request->input('customer_id');
         $meterID= $request->input('meter_id');
         $isSearchUser=$request->input('isSearchUser');
         $meterCount = MeterModel::where(["meterID" => $meterID])->count();
-        $userCount = RegistrationModel::where('user_id', $userID)->count();
+        $userCount = CustomerModel::where('customer_id', $customer_id)->count();
 
         if($isSearchUser==1){
             if($userCount!=0){
-                return TransactionModel::where(['userID' => $userID])->get();
+                return TransactionModel::where(['customer_id' => $customer_id])->get();
             }else{
-                return response()->json(['message' => 'No User Found', 'statusCode' => 404])->setStatusCode(404);
+                return response()->json(['message' => 'No Customer Found', 'statusCode' => 404])->setStatusCode(404);
             }
             
         }else{
@@ -155,48 +155,39 @@ class TransactionController extends Controller
     function updateTransaction(Request $request)
     {
         
-        $user_id = $request->input('user_id');
-        $meter_id = $request->input('meter_id');
+        $id = $request->input('id');
         $date=      $request->input('date');
-        $reportNo=time();
+        $reportNo=$request->input('reportNo');
         $comment=$request->input('comment');
         $fileData=$request->file('reportImage');
         $reportImage='';
-        $meterCount = MeterModel::where(["meterID" => $meter_id])->count();
-        $userCount = RegistrationModel::where('user_id', $user_id)->count();
         
-        if ($meterCount >= 1 && $userCount >= 1) {
+        if($fileData!=null){
+           
+            $imageUrl=$reportNo.'.'.$fileData->extension();
+            $fileData->move('images', $imageUrl);
+            $reportImage=$imageUrl;
             
-            if($fileData!=null){
-               
-                $imageUrl=time().$fileData->getClientOriginalName();
-                $fileData->move('images', $imageUrl);
-                $reportImage=$imageUrl;
-                
-                $result = TransactionModel::where(['userID' => $user_id, 'meterID' => $meter_id])->update([
-                    'createDate' => date('Y-m-d', strtotime($date)),
-                    'Comment' => $comment,
-                    'ReportImage' => $reportImage
-                ]);
-            }else{
-                
-                $result = TransactionModel::where(['userID' => $user_id, 'meterID' => $meter_id])->update([
-                    'createDate' => date('Y-m-d', strtotime($date)),
-                    'Comment' => $comment,
-                ]);
-            }
+            $result = TransactionModel::where(['id' => $id])->update([
+                'createDate' => date('Y-m-d', strtotime($date)),
+                'Comment' => $comment,
+                'reportNo' => $reportNo,
+                'ReportImage' => $reportImage
+            ]);
+        }else{
+            
+            $result = TransactionModel::where(['id' => $id])->update([
+                'createDate' => date('Y-m-d', strtotime($date)),
+                'reportNo' => $reportNo,
+                'Comment' => $comment,
+            ]);
+        }
 
-            if ($result == true) {
-                return response()->json(['message' => 'Transaction Updated Successfully', 'statusCode' => 200])->setStatusCode(200);
-            } else {
-                return response()->json(['message' => 'Transaction Updated Failed, Please Change Somethings', 'statusCode' => 404])->setStatusCode(404);
-        
-            }
-            
-        } else if($meterCount == 0){
-            return response()->json(['message' => 'Meter Not Found', 'statusCode' => 404])->setStatusCode(404);
-        }else {
-            return response()->json(['message' => 'User Not Found', 'statusCode' => 404])->setStatusCode(404);
+        if ($result == true) {
+            return response()->json(['message' => 'Transaction Updated Successfully', 'statusCode' => 200])->setStatusCode(200);
+        } else {
+            return response()->json(['message' => 'Transaction Updated Failed, Please Change Somethings', 'statusCode' => 404])->setStatusCode(404);
+    
         }
 }
 

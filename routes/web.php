@@ -51,5 +51,15 @@ $router->group(['prefix'=>'api'],function() use ($router){
         $router->get('/deletemeterByID', 'MeterController@deleteMeter');
         $router->get('/meterByID', 'MeterController@getMeterByID');
         $router->post('/meterUpdate', 'MeterController@updateMeter');
+
+        
+
+    // TODO: for Customer
+        $router->get('/allCustomer', 'CustomerController@allCustomers');
+        $router->post('/addCustomer', 'CustomerController@addCustomer');
+        $router->get('/deleteCustomer', 'CustomerController@deleteCustomer');
+        $router->get('/customerByID', 'CustomerController@getCustomerByID');
+        $router->post('/customerUpdate', 'CustomerController@updateCustomer');
+
    });
 });

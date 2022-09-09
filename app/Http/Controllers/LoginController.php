@@ -12,19 +12,19 @@ class LoginController extends Controller
     function onLogin(Request $request)
     {
         
-        $user_id = $request->input('user_id');
+        $job_code = $request->input('job_code');
         $password = $request->input('password');
-        $userCount = RegistrationModel::where(["user_id" => $user_id, "password" => $password,])->count();
+        $userCount = RegistrationModel::where(["job_code" => $job_code, "password" => $password,])->count();
         if ($userCount == 1) {
 
-            $user = RegistrationModel::where(["user_id" => $user_id, "password" => $password,])->first();
+            $user = RegistrationModel::where(["job_code" => $job_code, "password" => $password,])->first();
             $key = env('TOKEN_KEY');
                 $payload = array(
                     "site" => "http://demo.com",
                     "email" => $user->email,
                     "iat" => time(),
                     "exp" => time() + 3600,
-                    "id" => $user->user_id,
+                    "id" => $user->job_code,
                 );
                 $jwt = JWT::encode($payload, $key, 'HS256');
                 return response()->json(['message' => ' Login Success','token' => $jwt,  'user' => $user]);
@@ -42,12 +42,12 @@ class LoginController extends Controller
 
     function changePassword(Request $request)
     {
-        $user_id = $request->input('user_id');
+        $job_code = $request->input('job_code');
         $password = $request->input('password');
         $new_password = $request->input('new_password');
-        $userCount = RegistrationModel::where(["user_id" => $user_id, "password" => $password,])->count();
+        $userCount = RegistrationModel::where(["job_code" => $job_code, "password" => $password,])->count();
         if ($userCount == 1) {
-            $result = RegistrationModel::where(["user_id" => $user_id, "password" => $password,])->update([
+            $result = RegistrationModel::where(["job_code" => $job_code, "password" => $password,])->update([
                 'password' => $new_password
             ]);
             if ($result == true) {
@@ -62,9 +62,9 @@ class LoginController extends Controller
 
     function logout(Request $request)
     {
-        $user_id = $request->input('user_id');
+        $job_code = $request->input('job_code');
         $password = $request->input('password');
-        $userCount = RegistrationModel::where(["user_id" => $user_id, "password" => $password,])->count();
+        $userCount = RegistrationModel::where(["job_code" => $job_code, "password" => $password,])->count();
         if ($userCount == 1) {
             return response()->json(['message' => 'Logout Success', 'statusCode' => 200])->setStatusCode(200);
         } else {
